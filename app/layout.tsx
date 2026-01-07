@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-	title: '个人博客',
+	title: '斯卡布罗',
 	description: '一个展示个人技术文章和生活分享的博客'
 }
 
@@ -38,9 +38,14 @@ export default async function RootLayout({
 						<nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
 							<Link
 								href="/view/home"
-								className="text-2xl font-bold tracking-widest text-cyan-300"
+								className="flex items-center space-x-2 text-2xl font-bold tracking-widest text-cyan-300"
 							>
-								个人博客
+								<img
+									src="/head/logo.jpg"
+									alt="Logo"
+									className="w-12 h-8 rounded-md"
+								/>
+								<span>斯卡布罗</span>
 							</Link>
 							<div className="flex gap-6">
 								<Link
@@ -91,32 +96,6 @@ export default async function RootLayout({
 									搜索
 								</button>
 							</form>
-							{categories.length > 0 && (
-								<div className="flex flex-wrap items-center gap-2">
-									{categories.map((c) => (
-										<Link
-											key={c.slug}
-											href={`/view/categories/${c.slug}`}
-											className="rounded-full border border-cyan-500/40 px-2 py-1 text-xs text-cyan-200"
-										>
-											{c.name}
-										</Link>
-									))}
-								</div>
-							)}
-							{tags.length > 0 && (
-								<div className="mt-2 flex flex-wrap items-center gap-2">
-									{tags.map((t) => (
-										<Link
-											key={t.slug}
-											href={`/view/tags/${t.slug}`}
-											className="rounded-full bg-cyan-500/20 px-2 py-1 text-xs text-cyan-100"
-										>
-											#{t.name}
-										</Link>
-									))}
-								</div>
-							)}
 						</div>
 					</header>
 					<main className="mx-auto max-w-5xl px-6 py-10">{children}</main>

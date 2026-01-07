@@ -1,14 +1,25 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { Post, Category, Tag } from '@/lib/posts'
-import { supabase } from '@/lib/supabaseClient'
+import { createBrowserClient } from '@supabase/ssr'
+import CloudinaryUpload from '@/lib/CloudinaryUpload'
 
 export default function PostsPage() {
-	const [posts, setPosts] = useState<Post[]>([])
-	const [categories, setCategories] = useState<Category[]>([])
-	const [tags, setTags] = useState<Tag[]>([])
+	const supabase = createBrowserClient(
+		process.env.NEXT_PUBLIC_SUPABASE_URL!,
+		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+	);
+	const [posts, setPosts] = useState < Post[] > ([])
+	const [categories, setCategories] = useState < Category[] > ([])
+	const [tags, setTags] = useState < Tag[] > ([])
 	const [loading, setLoading] = useState(true)
 	const [showForm, setShowForm] = useState(false)
-	const [editingPost, setEditingPost] = useState<Post | null>(null)
+	const [editingPost, setEditingPost] = useState < Post | null > (null)
+	const [currentPage, setCurrentPage] = useState(1)
+	const [totalPages, setTotalPages] = useState(1)
+	const [totalPosts, setTotalPosts] = useState(0)
+	const postsPerPage = 20 // Number of posts per page
 	const [formData, setFormData] = useState({
 		title: '',
 		slug: '',
@@ -16,12 +27,40 @@ export default function PostsPage() {
 		content: '',
 		status: 'published',
 		categoryId: '',
-		tagIds: [] as string[]
+		tagIds: [] as string[],
+		posters: [] as string[]
 	})
+	const [newPosterUrl, setNewPosterUrl] = useState('')
+
+	const addPoster = () => {
+		if (newPosterUrl && !formData.posters.includes(newPosterUrl)) {
+			setFormData(prev => ({
+				...prev,
+				posters: [...prev.posters, newPosterUrl]
+			}))
+			setNewPosterUrl('')
+		}
+	}
+
+	const removePoster = (index: number) => {
+		const newPosters = [...formData.posters]
+		newPosters.splice(index, 1)
+		setFormData(prev => ({ ...prev, posters: newPosters }))
+	}
 
 	// 获取文章列表
-	const fetchPosts = async () => {
+	const fetchPosts = async (page: number = 1) => {
 		try {
+			// First get total count
+			const { count, error: countError } = await supabase
+				.from('posts')
+				.select('*', { count: 'exact', head: true })
+
+			if (countError) throw countError
+			setTotalPosts(count || 0)
+			setTotalPages(Math.ceil((count || 0) / postsPerPage))
+
+			// Then get the paginated data
 			const { data, error } = await supabase
 				.from('posts')
 				.select(
@@ -33,14 +72,17 @@ export default function PostsPage() {
           content, 
           published_at, 
           status, 
+          posters,
           category:categories(id, name, slug),
           tags:post_tags(tag:tags(id, name, slug))
         `
 				)
 				.order('published_at', { ascending: false })
+				.range((page - 1) * postsPerPage, page * postsPerPage - 1)
 
 			if (error) throw error
 			setPosts(data as unknown as Post[])
+			setCurrentPage(page)
 		} catch (error) {
 			console.error('获取文章列表失败:', error)
 		}
@@ -79,7 +121,7 @@ export default function PostsPage() {
 	useEffect(() => {
 		const loadData = async () => {
 			setLoading(true)
-			await Promise.all([fetchPosts(), fetchCategories(), fetchTags()])
+			await Promise.all([fetchPosts(1), fetchCategories(), fetchTags()])
 			setLoading(false)
 		}
 
@@ -108,6 +150,12 @@ export default function PostsPage() {
 		e.preventDefault()
 
 		try {
+			// Get current user
+			const { data: { user } } = await supabase.auth.getUser();
+			if (!user) {
+				throw new Error('用户未登录');
+			}
+
 			if (editingPost) {
 				// 更新文章
 				const { error: updateError } = await supabase
@@ -118,7 +166,10 @@ export default function PostsPage() {
 						summary: formData.summary,
 						content: formData.content,
 						status: formData.status,
-						category_id: formData.categoryId || null
+						posters: formData.posters,
+						category_id: formData.categoryId || null,
+						updated_at: new Date().toISOString(), // Update the timestamp
+						published_at: formData.status === 'published' && !editingPost.published_at ? new Date().toISOString() : editingPost.published_at // Set published_at if status is published and was not previously published
 					})
 					.eq('id', editingPost.id)
 
@@ -151,7 +202,10 @@ export default function PostsPage() {
 						summary: formData.summary,
 						content: formData.content,
 						status: formData.status,
-						category_id: formData.categoryId || null
+						posters: formData.posters,
+						category_id: formData.categoryId || null,
+						created_by: user.id, // Add the user ID
+						published_at: formData.status === 'published' ? new Date().toISOString() : null // Set published_at if status is published
 					})
 					.select()
 					.single()
@@ -181,7 +235,8 @@ export default function PostsPage() {
 				content: '',
 				status: 'published',
 				categoryId: '',
-				tagIds: []
+				tagIds: [],
+				posters: []
 			})
 			setEditingPost(null)
 			setShowForm(false)
@@ -214,7 +269,8 @@ export default function PostsPage() {
 			content: post.content || '',
 			status: post.status || 'published',
 			categoryId: post.category?.id || '',
-			tagIds: postTags?.map((pt) => pt.tag_id) || []
+			tagIds: postTags?.map((pt: { tag_id: string }) => pt.tag_id) || [],
+			posters: post.posters || []
 		})
 
 		setShowForm(true)
@@ -248,7 +304,8 @@ export default function PostsPage() {
 			content: '',
 			status: 'published',
 			categoryId: '',
-			tagIds: []
+			tagIds: [],
+			posters: []
 		})
 		setEditingPost(null)
 		setShowForm(false)
@@ -271,7 +328,8 @@ export default function PostsPage() {
 							content: '',
 							status: 'published',
 							categoryId: '',
-							tagIds: []
+							tagIds: [],
+							posters: []
 						})
 						setEditingPost(null)
 						setShowForm(true)
@@ -387,6 +445,54 @@ export default function PostsPage() {
 							</div>
 						</div>
 
+						<div>
+							<label className="block text-sm font-medium mb-1">海报图片</label>
+							<div className="mb-2">
+								{formData.posters && formData.posters.length > 0 && (
+									<div className="mb-2">
+										{formData.posters.map((poster, index) => (
+											<div key={index} className="flex items-center mb-1">
+												<img
+													src={poster}
+													alt={`海报 ${index + 1}`}
+													className="w-16 h-16 object-cover rounded mr-2"
+													onError={(e) => {
+														const target = e.target as HTMLImageElement;
+														target.onerror = null;
+														target.src = '/placeholder-image.jpg';
+													}}
+												/>
+												<span className="text-sm truncate max-w-xs">{poster}</span>
+												<button
+													type="button"
+													className="ml-2 text-red-500 hover:text-red-700"
+													onClick={() => removePoster(index)}
+												>
+													删除
+												</button>
+											</div>
+										))}
+									</div>
+								)}
+
+								<div className="mt-2">
+									<label className="block text-sm font-medium mb-1">或上传图片到Cloudinary</label>
+									<CloudinaryUpload
+										onUpload={(url: string) => {
+											setFormData(prev => ({
+												...prev,
+												posters: [...prev.posters, url]
+											}));
+										}}
+										folder="blog_posters"
+										className="w-full"
+									>
+										上传海报图片
+									</CloudinaryUpload>
+								</div>
+							</div>
+						</div>
+
 						<div className="flex space-x-2">
 							<button
 								type="submit"
@@ -427,11 +533,10 @@ export default function PostsPage() {
 								<td className="py-3 px-4">{post.title}</td>
 								<td className="py-3 px-4">
 									<span
-										className={`px-2 py-1 rounded text-xs ${
-											post.status === 'published'
-												? 'bg-green-900 text-green-200'
-												: 'bg-yellow-900 text-yellow-200'
-										}`}
+										className={`px-2 py-1 rounded text-xs ${post.status === 'published'
+											? 'bg-green-900 text-green-200'
+											: 'bg-yellow-900 text-yellow-200'
+											}`}
 									>
 										{post.status === 'published' ? '已发布' : '草稿'}
 									</span>
@@ -466,6 +571,54 @@ export default function PostsPage() {
 
 				{posts.length === 0 && (
 					<div className="text-center py-8 text-gray-400">暂无文章</div>
+				)}
+
+				{/* Pagination Controls */}
+				{totalPages > 1 && (
+					<div className="mt-6 flex items-center justify-between">
+						<div className="text-sm text-gray-400">
+							第 {currentPage} 页，共 {totalPages} 页，共 {totalPosts} 篇文章
+						</div>
+						<div className="flex space-x-2">
+							<button
+								onClick={() => fetchPosts(currentPage - 1)}
+								disabled={currentPage <= 1}
+								className={`px-4 py-2 rounded ${currentPage <= 1 ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-cyan-600 hover:bg-cyan-700 text-white'}`}
+							>
+								上一页
+							</button>
+
+							{Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+								let pageNum;
+								if (totalPages <= 5) {
+									pageNum = i + 1;
+								} else if (currentPage <= 3) {
+									pageNum = i + 1;
+								} else if (currentPage >= totalPages - 2) {
+									pageNum = totalPages - 4 + i;
+								} else {
+									pageNum = currentPage - 2 + i;
+								}
+								return (
+									<button
+										key={pageNum}
+										onClick={() => fetchPosts(pageNum)}
+										className={`px-4 py-2 rounded ${currentPage === pageNum ? 'bg-cyan-600 text-white' : 'bg-gray-700 text-white hover:bg-gray-600'}`}
+									>
+										{pageNum}
+									</button>
+								);
+							})}
+
+							<button
+								onClick={() => fetchPosts(currentPage + 1)}
+								disabled={currentPage >= totalPages}
+								className={`px-4 py-2 rounded ${currentPage >= totalPages ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-cyan-600 hover:bg-cyan-700 text-white'}`}
+							>
+								下一页
+							</button>
+						</div>
+					</div>
 				)}
 			</div>
 		</div>

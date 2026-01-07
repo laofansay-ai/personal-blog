@@ -20,6 +20,7 @@ export type Post = {
   content: string | null;
   published_at: string | null;
   status: string | null;
+  posters?: string[] | null;
   category?: Category | null;
   tags?: { tag: Tag }[] | null;
 };
@@ -28,7 +29,7 @@ export async function listPublishedPosts(limit = 20): Promise<Post[]> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "id, slug, title, summary, published_at, status, category:categories(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
+      "id, slug, title, summary, published_at, status, posters, category:categories(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
     )
     .eq("status", "published")
     .order("published_at", { ascending: false })
@@ -40,11 +41,49 @@ export async function listPublishedPosts(limit = 20): Promise<Post[]> {
   return (data as Post[]) ?? [];
 }
 
+export async function getPostWithNeighbors(slug: string): Promise<{ post: Post | null, prevPost: Post | null, nextPost: Post | null }> {
+  // First get the current post
+  const post = await getPostBySlug(slug);
+
+  if (!post) {
+    return { post: null, prevPost: null, nextPost: null };
+  }
+
+  // Get all published posts in chronological order
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      "id, slug, title, summary, content, published_at, status, posters, category:categories!inner(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
+    )
+    .eq("status", "published")
+    .order("published_at", { ascending: true });
+
+  if (error) {
+    console.error("supabase getPostWithNeighbors error", error);
+    return { post, prevPost: null, nextPost: null };
+  }
+
+  const allPosts = (data as Post[]) ?? [];
+
+  // Find the index of the current post
+  const currentIndex = allPosts.findIndex(p => p.slug === slug);
+
+  if (currentIndex === -1) {
+    return { post, prevPost: null, nextPost: null };
+  }
+
+  // Get previous and next posts
+  const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+  const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+
+  return { post, prevPost, nextPost };
+}
+
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "id, slug, title, summary, content, published_at, status, category:categories(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
+      "id, slug, title, summary, content, published_at, status, posters, category:categories(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
     )
     .eq("slug", slug)
     .limit(1)
@@ -71,7 +110,7 @@ export async function listPostsByCategorySlug(slug: string, limit = 20): Promise
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "id, slug, title, summary, published_at, status, category:categories(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
+      "id, slug, title, summary, published_at, status, posters, category:categories(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
     )
     .eq("status", "published")
     .eq("category_id", cat.id)
@@ -100,7 +139,7 @@ export async function listPostsByTagSlug(slug: string, limit = 20): Promise<Post
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "id, slug, title, summary, published_at, status, category:categories(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
+      "id, slug, title, summary, published_at, status, posters, category:categories(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
     )
     .eq("status", "published")
     .in("id", ids)
@@ -123,7 +162,7 @@ export async function searchPosts(params: {
   let query = supabase
     .from("posts")
     .select(
-      "id, slug, title, summary, content, published_at, status, category:categories(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
+      "id, slug, title, summary, content, published_at, status, posters, category:categories(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
     )
     .eq("status", "published")
     .order("published_at", { ascending: false })

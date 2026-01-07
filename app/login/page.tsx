@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
 
 export default function LoginPage() {
 	const [email, setEmail] = useState('')
@@ -17,16 +16,23 @@ export default function LoginPage() {
 		setError('')
 
 		try {
-			const { data, error } = await supabase.auth.signInWithPassword({
-				email,
-				password
+			// Call server action for login
+			const response = await fetch('/api/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ email, password }),
 			})
 
-			if (error) throw error
+			const result = await response.json()
 
-			// 登录成功，重定向到管理页面
-			router.push('/admin')
-			router.refresh()
+			if (!response.ok) throw new Error(result.error || '登录失败')
+
+			// 登录成功，在新窗口打开管理页面
+			window.open('/admin', '_blank')
+			// 可选：关闭登录页面或显示提示
+			// router.push('/') // 或者返回首页
 		} catch (err) {
 			console.error('登录失败:', err)
 			setError('登录失败: ' + (err as Error).message)
@@ -41,17 +47,23 @@ export default function LoginPage() {
 		setError('')
 
 		try {
-			// 使用预设的管理员账户登录
-			const { data, error } = await supabase.auth.signInWithPassword({
-				email: 'admin@example.com',
-				password: 'Admin123!@#'
+			// Call server action for guest login
+			const response = await fetch('/api/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ email: 'admin@example.com', password: 'Admin123!@#' }),
 			})
 
-			if (error) throw error
+			const result = await response.json()
 
-			// 登录成功，重定向到管理页面
-			router.push('/admin')
-			router.refresh()
+			if (!response.ok) throw new Error(result.error || '访客登录失败')
+
+			// 登录成功，在新窗口打开管理页面
+			window.open('/admin', '_blank')
+			// 可选：关闭登录页面或显示提示
+			// router.push('/') // 或者返回首页
 		} catch (err) {
 			console.error('访客登录失败:', err)
 			setError('访客登录失败: ' + (err as Error).message)
