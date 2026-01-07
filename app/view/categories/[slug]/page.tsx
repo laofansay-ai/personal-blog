@@ -2,10 +2,11 @@ import { listPostsByCategorySlug } from "@/lib/posts";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
 export default async function CategoryPage({ params }: Props) {
-  const posts = await listPostsByCategorySlug(params.slug, 50);
+  const resolvedParams = await params;
+  const posts = await listPostsByCategorySlug(resolvedParams.slug, 50);
   if (posts.length === 0) {
     notFound();
   }

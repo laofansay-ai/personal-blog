@@ -3,17 +3,18 @@ import { listAllCategories, listAllTags } from "@/lib/taxonomy";
 import Link from "next/link";
 
 type Props = {
-  searchParams?: {
+  searchParams?: Promise<{
     q?: string;
     category?: string;
     tag?: string;
-  };
+  }>;
 };
 
 export default async function SearchPage({ searchParams }: Props) {
-  const q = searchParams?.q || "";
-  const category = searchParams?.category || "";
-  const tag = searchParams?.tag || "";
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const q = resolvedSearchParams.q || "";
+  const category = resolvedSearchParams.category || "";
+  const tag = resolvedSearchParams.tag || "";
   const [posts, categories, tags] = await Promise.all([
     searchPosts({ q, category, tag, limit: 100 }),
     listAllCategories(),

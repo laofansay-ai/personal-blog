@@ -29,7 +29,9 @@ export async function listPublishedPosts(limit = 20): Promise<Post[]> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "id, slug, title, summary, published_at, status, posters, category:categories(id,name,slug), tags:post_tags(tag:tags(id,name,slug))"
+      `id, slug, title, summary, content, published_at, status, posters, 
+       category:categories!inner(id,name,slug), 
+       tags:post_tags(tag:tags(id,name,slug))`
     )
     .eq("status", "published")
     .order("published_at", { ascending: false })
@@ -38,7 +40,7 @@ export async function listPublishedPosts(limit = 20): Promise<Post[]> {
     console.error("supabase listPublishedPosts error", error);
     return [];
   }
-  return (data as Post[]) ?? [];
+  return (data as unknown as Post[]) ?? [];
 }
 
 export async function getPostWithNeighbors(slug: string): Promise<{ post: Post | null, prevPost: Post | null, nextPost: Post | null }> {
@@ -63,7 +65,7 @@ export async function getPostWithNeighbors(slug: string): Promise<{ post: Post |
     return { post, prevPost: null, nextPost: null };
   }
 
-  const allPosts = (data as Post[]) ?? [];
+  const allPosts = (data as unknown as Post[]) ?? [];
 
   // Find the index of the current post
   const currentIndex = allPosts.findIndex(p => p.slug === slug);
@@ -92,7 +94,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     console.error("supabase getPostBySlug error", error);
     return null;
   }
-  return (data as Post) ?? null;
+  return (data as unknown as Post) ?? null;
 }
 
 export async function listPostsByCategorySlug(slug: string, limit = 20): Promise<Post[]> {
@@ -120,7 +122,7 @@ export async function listPostsByCategorySlug(slug: string, limit = 20): Promise
     console.error("supabase listPostsByCategorySlug error", error);
     return [];
   }
-  return (data as Post[]) ?? [];
+  return (data as unknown as Post[]) ?? [];
 }
 
 export async function listPostsByTagSlug(slug: string, limit = 20): Promise<Post[]> {
@@ -149,7 +151,7 @@ export async function listPostsByTagSlug(slug: string, limit = 20): Promise<Post
     console.error("supabase listPostsByTagSlug error", error);
     return [];
   }
-  return (data as Post[]) ?? [];
+  return (data as unknown as Post[]) ?? [];
 }
 
 export async function searchPosts(params: {
@@ -205,5 +207,5 @@ export async function searchPosts(params: {
     console.error("supabase searchPosts error", error);
     return [];
   }
-  return (data as Post[]) ?? [];
+  return (data as unknown as Post[]) ?? [];
 }

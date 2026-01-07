@@ -2,8 +2,7 @@ import Link from 'next/link';
 import { listAllTags } from '@/lib/taxonomy';
 
 const SideBySideTaxonomy = async () => {
-    const [categories, tags] = await Promise.all([
-        listAllCategories(),
+    const [tags] = await Promise.all([
         listAllTags()
     ]);
 

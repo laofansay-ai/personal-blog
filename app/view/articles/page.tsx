@@ -4,8 +4,9 @@ import { listAllCategories, listAllTags } from "@/lib/taxonomy";
 import CategoriesOnly from "@/components/CategoriesOnly";
 import TagsOnly from "@/components/TagsOnly";
 
-export default async function ArticlesView({ searchParams }: { searchParams: { page?: string } }) {
-  const page = parseInt(searchParams.page || '1');
+export default async function ArticlesView({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page: pageParam } = await searchParams;
+  const page = parseInt(pageParam || '1');
   const limit = 10; // Number of posts per page
 
   const [allPosts, categories, tags] = await Promise.all([

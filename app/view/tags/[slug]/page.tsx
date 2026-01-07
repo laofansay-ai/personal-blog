@@ -2,16 +2,17 @@ import { listPostsByTagSlug } from "@/lib/posts";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
 export default async function TagPage({ params }: Props) {
-  const posts = await listPostsByTagSlug(params.slug, 50);
+  const resolvedParams = await params;
+  const posts = await listPostsByTagSlug(resolvedParams.slug, 50);
   if (posts.length === 0) {
     notFound();
   }
   return (
     <section>
-      <h1 className="text-3xl font-bold text-cyan-300">标签：{params.slug}</h1>
+      <h1 className="text-3xl font-bold text-cyan-300">标签：{resolvedParams.slug}</h1>
       <div className="mt-6 grid gap-6 sm:grid-cols-2">
         {posts.map((p) => (
           <Link
