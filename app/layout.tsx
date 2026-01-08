@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
 	title: '斯卡布罗',
-	description: '一个展示个人技术文章和生活分享的博客'
+	description: '一个展示个人自媒体素材博文和生活分享的博客'
 }
 
 export default async function RootLayout({
@@ -100,7 +100,7 @@ export default async function RootLayout({
 					</header>
 					<main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
 					<footer className="mx-auto max-w-5xl px-6 py-8 text-sm text-cyan-300/70">
-						© {new Date().getFullYear()} 个人博客
+						© {new Date().getFullYear()} 个人自媒体素材博客
 					</footer>
 				</div>
 			</body>

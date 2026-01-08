@@ -1,5 +1,8 @@
 # 个人博客系统 Personal Blog System
 
+博客网址：https://media.laofansay.uk/
+我的youtobe频道：https://www.youtube.com/@Scarboroug
+
 ## 🇨🇳 中文说明
 
 ### 项目简介
@@ -208,3 +211,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🆘 Support
 If you have any questions or need help, feel free to open an issue in the GitHub repository.
+

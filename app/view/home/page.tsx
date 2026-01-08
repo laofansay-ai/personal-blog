@@ -8,7 +8,7 @@ export default async function HomeView() {
       <div className="rounded-xl p-10 border border-cyan-500/30 bg-gradient-to-b from-[#0b0b1b]/70 to-[#160734]/60 shadow-[inset_0_0_20px_rgba(124,58,237,0.2),0_0_12px_rgba(0,234,255,0.15)]">
         <h1 className="text-4xl font-extrabold text-cyan-300 drop-shadow-[0_0_8px_rgba(0,234,255,0.8)]">技术与生活的霓虹记事</h1>
         <p className="mt-4 text-cyan-200">
-          记录开发心得、工具实践与个人生活分享，风格浓烈的赛博朋克。
+          记录开发心得、工具实践与个人自媒体素材、生活分享，风格浓烈的赛博朋克。
         </p>
         <div className="mt-6 flex gap-4">
           <Link href="/view/articles" className="px-5 py-3 rounded-lg bg-gradient-to-r from-cyan-400 to-pink-500 text-[#0a0a0f]">开始阅读</Link>
