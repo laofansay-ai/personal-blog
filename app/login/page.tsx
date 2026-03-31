@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LoginPage() {
 	const [email, setEmail] = useState('')
@@ -35,38 +36,7 @@ export default function LoginPage() {
 			// router.push('/') // 或者返回首页
 		} catch (err) {
 			console.error('登录失败:', err)
-			setError('登录失败: ' + (err as Error).message)
-		} finally {
-			setLoading(false)
-		}
-	}
-
-	// 处理访客登录
-	const handleGuestLogin = async () => {
-		setLoading(true)
-		setError('')
-
-		try {
-			// Call server action for guest login
-			const response = await fetch('/api/login', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ email: 'admin@example.com', password: 'Admin123!@#' }),
-			})
-
-			const result = await response.json()
-
-			if (!response.ok) throw new Error(result.error || '访客登录失败')
-
-			// 登录成功，在新窗口打开管理页面
-			window.open('/admin', '_blank')
-			// 可选：关闭登录页面或显示提示
-			// router.push('/') // 或者返回首页
-		} catch (err) {
-			console.error('访客登录失败:', err)
-			setError('访客登录失败: ' + (err as Error).message)
+			setError('登录失败：' + (err as Error).message)
 		} finally {
 			setLoading(false)
 		}
@@ -118,16 +88,12 @@ export default function LoginPage() {
 				</form>
 
 				<div className="mt-6 pt-6 border-t border-gray-700">
-					<p className="text-center text-sm text-gray-400 mb-3">
-						或使用访客账户登录（仅用于演示）
+					<p className="text-center text-sm text-gray-400">
+						还没有账户？{' '}
+						<Link href="/register" className="text-cyan-400 hover:text-cyan-300">
+							立即注册
+						</Link>
 					</p>
-					<button
-						onClick={handleGuestLogin}
-						disabled={loading}
-						className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded disabled:opacity-50"
-					>
-						访客登录
-					</button>
 				</div>
 			</div>
 		</div>

@@ -41,11 +41,11 @@ export default async function RootLayout({
 								className="flex items-center space-x-2 text-2xl font-bold tracking-widest text-cyan-300"
 							>
 								<img
-									src="/head/logo.jpg"
+									src="/head/ai-logo1.png"
 									alt="Logo"
-									className="w-12 h-8 rounded-md"
+									className="w-30 h-8 rounded-md"
 								/>
-								<span>斯卡布罗</span>
+								<span>AI劝退周刊</span>
 							</Link>
 							<div className="flex gap-6">
 								<Link

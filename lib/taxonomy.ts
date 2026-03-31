@@ -9,6 +9,7 @@ export async function listAllCategories(): Promise<Category[]> {
     .select("id, name, slug")
     .order("name", { ascending: true });
   if (error) {
+    // eslint-disable-next-line no-console
     console.error("supabase listAllCategories error", error);
     return [];
   }
@@ -21,6 +22,7 @@ export async function listAllTags(): Promise<Tag[]> {
     .select("id, name, slug")
     .order("name", { ascending: true });
   if (error) {
+    // eslint-disable-next-line no-console
     console.error("supabase listAllTags error", error);
     return [];
   }

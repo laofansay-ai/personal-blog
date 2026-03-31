@@ -17,7 +17,7 @@
 - ✅ **分页功能** - 文章列表支持分页显示
 - ✅ **前后章节导航** - 文章详情页支持上下篇切换
 - ✅ **用户认证** - 基于 Supabase 的身份验证系统
-- ✅ **云存储** - 图片上传到 Cloudinary
+- ✅ **云存储** - 图片上传到 Supabase Storage
 - ✅ **SEO 优化** - 良好的搜索引擎优化
 
 ### 技术栈
@@ -49,17 +49,20 @@ yarn install
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your_cloudinary_upload_preset
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
 
 #### 4. 数据库设置
 本项目使用 Supabase 作为数据库。你需要：
 
 1. 在 [Supabase](https://supabase.com) 创建项目
-2. 执行 SQL 文件初始化数据库结构：
+2. 推送或执行 SQL 文件初始化数据库结构：
+   # Link your project first
+   supabase link --project-ref zbziqvakppmopcgiypxg
+
+   # Then push migrations using db push
+   supabase db push
+   或者执行
+
    - `supabase/01_schema.sql` - 基础表结构
    - `supabase/02_policies.sql` - 安全策略
    - `supabase/03_seed.sql` - 初始数据
@@ -72,6 +75,7 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
    - `supabase/10_categories_tags_seed.sql` - 分类和标签初始数据
    - `supabase/11_posts_posters.sql` - 文章海报字段
    - `supabase/12_fix_posters_null.sql` - 海报字段修复
+   - `supabase/13_storage_posters.sql` - Supabase Storage 存储桶配置
 
 #### 5. 启动开发服务器
 ```bash
@@ -125,7 +129,7 @@ This is a modern personal blog system built with Next.js 16+ and Supabase. The s
 - **Frontend**: Next.js 16+, React, TypeScript
 - **Styling**: Tailwind CSS
 - **Backend**: Supabase (PostgreSQL)
-- **Image Storage**: Cloudinary
+- **Image Storage**: Supabase Storage
 - **Deployment**: Vercel or other Next.js supported platforms
 
 ### Quick Start
@@ -150,10 +154,6 @@ Copy `.env.local.sample` to `.env.local` and fill in your configuration:
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your_cloudinary_upload_preset
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
 
 #### 4. Database Setup

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Post, Category, Tag } from '@/lib/posts'
 import { createBrowserClient } from '@supabase/ssr'
-import CloudinaryUpload from '@/lib/CloudinaryUpload'
+import SupabaseUpload from '@/lib/SupabaseUpload'
 
 export default function PostsPage() {
 	const supabase = createBrowserClient(
@@ -476,19 +476,20 @@ export default function PostsPage() {
 								)}
 
 								<div className="mt-2">
-									<label className="block text-sm font-medium mb-1">或上传图片到Cloudinary</label>
-									<CloudinaryUpload
+									<label className="block text-sm font-medium mb-1">或上传图片到 Supabase Storage</label>
+									<SupabaseUpload
 										onUpload={(url: string) => {
 											setFormData(prev => ({
 												...prev,
 												posters: [...prev.posters, url]
 											}));
 										}}
+										bucket="posters"
 										folder="blog_posters"
 										className="w-full"
 									>
 										上传海报图片
-									</CloudinaryUpload>
+									</SupabaseUpload>
 								</div>
 							</div>
 						</div>
