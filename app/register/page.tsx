@@ -8,6 +8,7 @@ export default function RegisterPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
+    const [registrationCode, setRegistrationCode] = useState('')
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
     const [loading, setLoading] = useState(false)
@@ -39,7 +40,7 @@ export default function RegisterPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, password, registrationCode }),
             })
 
             const result = await response.json()
@@ -113,6 +114,18 @@ export default function RegisterPage() {
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white"
                             placeholder="再次输入密码"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">注册码</label>
+                        <input
+                            type="text"
+                            value={registrationCode}
+                            onChange={(e) => setRegistrationCode(e.target.value)}
+                            className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white"
+                            placeholder="输入注册码"
                             required
                         />
                     </div>

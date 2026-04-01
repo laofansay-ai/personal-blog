@@ -31,6 +31,8 @@ export default function PostsPage() {
 		posters: [] as string[]
 	})
 	const [newPosterUrl, setNewPosterUrl] = useState('')
+	const [wechatPushing, setWechatPushing] = useState < string | null > (null)
+	const [wechatStatus, setWechatStatus] = useState < Record < string, any>> ({})
 
 	const addPoster = () => {
 		if (newPosterUrl && !formData.posters.includes(newPosterUrl)) {
@@ -296,6 +298,95 @@ export default function PostsPage() {
 		}
 	}
 
+	const handleWechatPush = async (post: Post) => {
+		if (!post.posters || post.posters.length === 0) {
+			alert('请先上传文章封面图')
+			return
+		}
+
+		setWechatPushing(post.id)
+
+		try {
+			// Step 1: Upload cover image to WeChat
+			const uploadResponse = await fetch('/api/wechat', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					action: 'uploadImage',
+					imageUrl: post.posters[0],
+				}),
+			})
+
+			const uploadResult = await uploadResponse.json()
+
+			if (!uploadResult.success) {
+				throw new Error(uploadResult.error || '上传封面失败')
+			}
+
+			// Step 2: Create draft article
+			const draftResponse = await fetch('/api/wechat', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					action: 'addDraft',
+					title: post.title,
+					content: post.content || '',
+					summary: post.summary || '',
+					author: 'AI 劝退周刊',
+					imageUrl: post.posters[0],
+				}),
+			})
+
+			const draftResult = await draftResponse.json()
+
+			if (!draftResult.success) {
+				throw new Error(draftResult.error || '创建草稿失败')
+			}
+
+			// Step 3: 暂时跳过发布，仅保存到草稿箱
+			// 如需发布，请在微信公众号后台手动操作
+			// 注意：个人订阅号没有群发权限，只能保存到草稿箱
+
+			alert('✅ 文章已保存到微信草稿箱！\n\n请前往微信公众号后台 → 草稿箱 → 手动预览并发布')
+
+			// Update status
+			setWechatStatus(prev => ({
+				...prev,
+				[post.id]: {
+					success: true,
+					msg_id: draftResult.data.media_id,
+					time: new Date().toLocaleString(),
+				}
+			}))
+
+			// Save wechat info to database
+			await supabase.from('posts').update({
+				wechat_media_id: draftResult.data.media_id,
+				wechat_msg_id: draftResult.data.media_id,
+				wechat_published_at: new Date().toISOString(),
+			}).eq('id', post.id)
+
+		} catch (error) {
+			console.error('微信推送失败:', error)
+			alert('❌ 推送失败：' + (error as Error).message)
+
+			setWechatStatus(prev => ({
+				...prev,
+				[post.id]: {
+					success: false,
+					error: (error as Error).message,
+					time: new Date().toLocaleString(),
+				}
+			}))
+		} finally {
+			setWechatPushing(null)
+		}
+	}
+
 	const handleCancel = () => {
 		setFormData({
 			title: '',
@@ -522,6 +613,7 @@ export default function PostsPage() {
 							<th className="py-3 px-4 text-left">分类</th>
 							<th className="py-3 px-4 text-left">标签</th>
 							<th className="py-3 px-4 text-left">发布日期</th>
+							<th className="py-3 px-4 text-left">微信推送</th>
 							<th className="py-3 px-4 text-right">操作</th>
 						</tr>
 					</thead>
@@ -550,6 +642,20 @@ export default function PostsPage() {
 									{post.published_at
 										? new Date(post.published_at).toLocaleDateString()
 										: '-'}
+								</td>
+								<td className="py-3 px-4">
+									{wechatPushing === post.id ? (
+										<span className="text-blue-400">推送中...</span>
+									) : wechatStatus[post.id]?.success ? (
+										<span className="text-green-400">已推送</span>
+									) : (
+										<button
+											onClick={() => handleWechatPush(post)}
+											className="text-blue-400 hover:text-blue-300"
+										>
+											推送
+										</button>
+									)}
 								</td>
 								<td className="py-3 px-4 text-right">
 									<button

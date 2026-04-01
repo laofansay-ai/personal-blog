@@ -1,0 +1,53 @@
+# Supabase Configuration
+# Replace these placeholder values with your actual Supabase project credentials
+# You can find these in your Supabase project dashboard at https://supabase.com/dashboard
+
+# Example format:
+# EXPO_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+# EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+
+# For development/demo purposes, using placeholder values that won't cause URL errors
+
+# For development/demo purposes, using placeholder values that won't cause URL errors
+#NEXT_PUBLIC_SUPABASE_URL=https://aselzavunkxbkzrpusxd.supabase.co
+#NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZWx6YXZ1bmt4Ymt6cnB1c3hkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM5NTMyNzgsImV4cCI6MjA1OTUyOTI3OH0.ujnkiSxAAtRZMziQuzk1T85gp2MXRWXPioDJ8gjsW80
+#SUPABASE_DB_URL=postgresql://postgres:Pz8kuLJGDqQEPTl0@db.aselzavunkxbkzrpusxd.supabase.co:5432/postgres
+
+
+
+NEXT_PUBLIC_SUPABASE_URL=https://zbziqvakppmopcgiypxg.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_j3kOq7XHyGyC9Vc9f92H7g_ZaOgJn-g
+SUPABASE_DB_URL=postgresql://postgres:oEZQLz0i22SxBj1U@db.zbziqvakppmopcgiypxg.supabase.co:5432/postgres
+
+# Pz8kuLJGDqQEPTl0
+
+# Cloudinary 配置
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dmwkkgxgd
+NEXT_PUBLIC_CLOUDINARY_API_KEY=795798678543751
+NEXT_PUBLIC_CLOUDINARY_API_SECRET=EgZwL08fUpdY9Fh_9u2sk9JWsvo
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=scarborough-fair-upload
+
+
+
+
+
+web_site_name=AI劝退周刊
+
+
+
+# 公众号基本信息 gh_c508708dc556
+WECHAT_APP_ID=wx816086303b9b5242
+WECHAT_APP_SECRET=f27cdc2a122205e73165560ce803f6b6
+# 微信服务器配置 Token（用于验证服务器）
+WECHAT_TOKEN=abcd
+# 微信服务器 EncodingAESKey（可选，加密模式需要）
+WECHAT_ENCODING_AES_KEY=your_encoding_aes_key
+
+WECHAT_PUSH_ENABLED=true
+
+#管理员设置授权码
+WECHAT_REGISTRATION_CODE=aibailout
+
+#公众号=AI劝退周勘
+#AppID=wx816086303b9b5242
+#AppSecret=f27cdc2a122205e73165560ce803f6b6

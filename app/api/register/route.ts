@@ -4,13 +4,22 @@ import { cookies } from 'next/headers'
 
 export async function POST(request: Request) {
     try {
-        const { email, password } = await request.json()
+        const { email, password, registrationCode } = await request.json()
 
         // Validate input
         if (!email || !password) {
             return NextResponse.json(
                 { error: '邮箱和密码不能为空' },
                 { status: 400 }
+            )
+        }
+
+        // Validate registration code
+        const correctCode = process.env.WECHAT_REGISTRATION_CODE
+        if (!registrationCode || registrationCode !== correctCode) {
+            return NextResponse.json(
+                { error: '授权码错误，无法注册' },
+                { status: 403 }
             )
         }
 
